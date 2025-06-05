@@ -16,6 +16,7 @@ TORRENT_DIRECTORY = "/media/accessory/Extreme SSD/Torrents"
 FILE_DIRECTORY = "/media/accessory/Extreme SSD/Videos"
 
 MAXIMUM_TORRENTS = 25
+MAXIMUM_FILES = 25
 
 class ApplicationWindow:
     def __init__(self):
@@ -167,7 +168,7 @@ class ApplicationWindow:
             self.droplet_list.append(Droplet(torrent_file, bdecode(torrent_file)))
 
     def update_files(self):
-        input_1, input_2 = search_directory(self.file_directory_name)
+        input_1, input_2 = search_directory(self.file_directory_name, maximum_files = MAXIMUM_FILES)
         self.file_list = input_1
         self.filename_list = StringVar(value=input_2)
 

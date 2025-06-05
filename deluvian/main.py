@@ -1,3 +1,6 @@
-from deluvian.gui.mainwindow import ApplicationWindow
+from deluvian.application import Application
 
-my_application = ApplicationWindow()
+if __name__ == "__main__":
+	application = Application()
+else:
+    application = Application()
