@@ -1,18 +1,21 @@
 from tkinter import *
 from tkinter import ttk
 
-from droplet import Droplet
-from directories import search_directory_extension, search_directory
-from utilities import bdecode, pretty_print_torrent, print_tuple_list
+from deluvian.core.droplet import Droplet
+from deluvian.utils.directories import search_directory_extension, search_directory
+from deluvian.utils.utilities import bdecode, pretty_print_torrent, print_tuple_list
 
 import os
 
 TORRENT_EXTENSION = ".torrent"
 MP4_EXTENSION = ".mp4"
 APPLICATION_NAME = "Deluvian"
-TORRENT_DIRECTORY = "F:\\Videos\\Torrent"
-FILE_DIRECTORY = "F:\\Videos\\Movies"
+#TORRENT_DIRECTORY = "F:\\Videos\\Torrent"
+#FILE_DIRECTORY = "F:\\Videos\\Movies"
+TORRENT_DIRECTORY = "/media/accessory/Extreme SSD/Torrents"
+FILE_DIRECTORY = "/media/accessory/Extreme SSD/Videos"
 
+MAXIMUM_TORRENTS = 25
 
 class ApplicationWindow:
     def __init__(self):
@@ -153,11 +156,11 @@ class ApplicationWindow:
         # self.file_text.insert(END, print_tuple_list())
 
     def update_torrent_list(self):
-        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION)
+        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = MAXIMUM_TORRENTS)
         self.torrent_list = StringVar(value=self.torrent_files_concatenated)
 
     def populate_torrents(self):
-        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION)
+        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = MAXIMUM_TORRENTS)
         self.torrent_list = StringVar(value=self.torrent_files_concatenated)
         self.droplet_list.clear()
         for torrent_file in self.torrent_files_concatenated:

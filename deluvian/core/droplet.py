@@ -20,8 +20,9 @@ class Droplet:
     def _convert_raw_torrent(self, torrent):
         self.raw_torrent = torrent
         self.announce = torrent[0][b'announce']
-        self.created_by = torrent[0][b'created by']
+        #self.created_by = torrent[0][b'created by']
         self.creation_date = torrent[0][b'creation date']
+        self.created_by = torrent[0].get(b'created by', None)
         if b'encoding' in torrent[0].keys():
             self.encoding = torrent[0][b'encoding']
         else:
