@@ -38,33 +38,44 @@ class ApplicationWindow:
         self.highlighted_torrents = []
         self.highlighted_files = []
 
-        root = Tk()
-        root.title(APPLICATION_NAME)
-        main_window = ttk.Frame(root, padding=(3, 3, 12, 12))
-        main_window.grid(column=0, row=0, sticky=(N, E, S, W))
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
+        self.root = Tk()
+        self.root.title(APPLICATION_NAME)
+        self.layout_window()
+
+        #self.torrent_directory = StringVar()
+        #self.file_directory = StringVar()
+        
+        #self.torrent_directory.set(self.torrent_directory_name)
+        #self.file_directory.set(self.file_directory_name)
+
+        self.populate_torrents()
+        self.update_files()
+        self.correlate_files()
+
+        self.root.mainloop()
+        
+    def layout_window(self):
+        self.main_window = ttk.Frame(self.root, padding=(3, 3, 12, 12))
+        self.main_window.grid(column=0, row=0, sticky=(N, E, S, W))
+        
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
 
         # Configure menu
-        root.option_add('*tearOff', FALSE)
-        root_window = Toplevel(root)
-        menubar = Menu(root_window)
-        root_window['menu'] = menubar
-        menu_manage = Menu(menubar)
-        menubar.add_cascade(menu=menu_manage, label='Manage')
-        menu_manage.add_command(label='Load Association', command=self.load_association)
-        menu_manage.add_command(label='Save Association', command=self.save_association)
-        menu_manage.add_command(label='Load Torrents', command=self.load_torrents)
-        menu_manage.add_command(label='Associate Torrents', command=self.associate_torrents)
+        self.root.option_add('*tearOff', FALSE)
+        self.root_window = Toplevel(self.root)
+        self.menubar = Menu(self.root_window)
+        self.root_window['menu'] = self.menubar
+        self.menu_manage = Menu(self.menubar)
+        self.menubar.add_cascade(menu=self.menu_manage, label='Manage')
+        self.menu_manage.add_command(label='Load Association', command=self.load_association)
+        self.menu_manage.add_command(label='Save Association', command=self.save_association)
+        self.menu_manage.add_command(label='Load Torrents', command=self.load_torrents)
+        self.menu_manage.add_command(label='Associate Torrents', command=self.associate_torrents)
 
-        left_panel = ttk.Frame(main_window)
-        # middle_panel = ttk.Frame(main_window, width=360)
-        middle_panel = ttk.Frame(main_window)
-        right_panel = ttk.Frame(main_window)
-        left_panel.grid(column=0, row=0, rowspan=2, sticky=(N, E, S, W))
-        middle_panel.grid(column=1, row=0, sticky=(N, S))
-        # middle_panel.grid_propagate(False)
-        right_panel.grid(column=2, row=0, sticky=(N, E, S, W))
+        self.left_panel = ttk.Frame(self.main_window)
+        self.middle_panel = ttk.Frame(self.main_window)
+        self.right_panel = ttk.Frame(self.main_window)
 
         # right_upper_panel = ttk.Frame(middle_panel)
         # right_lower_panel = ttk.Frame(middle_panel)
@@ -76,59 +87,58 @@ class ApplicationWindow:
 
         self.torrent_directory = StringVar()
         self.file_directory = StringVar()
+        
         self.torrent_directory.set(self.torrent_directory_name)
         self.file_directory.set(self.file_directory_name)
 
-        torrent_directory_entry = ttk.Entry(middle_panel, textvariable=self.torrent_directory)
-        file_directory_entry = ttk.Entry(middle_panel, textvariable=self.file_directory)
-        torrent_directory_entry.grid(column=0, row=0)
-        file_directory_entry.grid(column=0, row=1)
+        self.torrent_directory_entry = ttk.Entry(self.middle_panel, textvariable=self.torrent_directory)
+        self.file_directory_entry = ttk.Entry(self.middle_panel, textvariable=self.file_directory)
 
-        self.populate_torrents()
-        self.update_files()
-        self.correlate_files()
+        self.torrent_listbox = Listbox(self.left_panel, listvariable=self.torrent_list)
+        self.file_listbox = Listbox(self.right_panel, listvariable=self.filename_list) 
+        self.file_text = Text(self.middle_panel, wrap="none")
 
-        self.torrent_listbox = Listbox(left_panel, listvariable=self.torrent_list)
+        self.info_scrollbar_vertical = Scrollbar(self.middle_panel, orient=VERTICAL)
+        self.info_scrollbar_horizontal = Scrollbar(self.middle_panel, orient=HORIZONTAL)
+
         self.torrent_listbox.bind("<<ListboxSelect>>", lambda e: self.torrent_listbox_changed(self.torrent_listbox.curselection()))
-        self.torrent_listbox.grid(column=0, row=0, sticky=(N, E, S, W))
-
-        self.file_listbox = Listbox(right_panel, listvariable=self.filename_list)
         self.file_listbox.bind("<<ListboxSelect>>", lambda e: self.file_listbox_changed(self.file_listbox.curselection()))
+
+        self.main_window.columnconfigure(0, weight=2)
+        self.main_window.columnconfigure(1, weight=1)
+        self.main_window.columnconfigure(2, weight=2)
+        self.main_window.rowconfigure(0, weight=1)
+
+        self.left_panel.columnconfigure(0, weight=1)
+        self.left_panel.rowconfigure(0, weight=1)
+        self.right_panel.columnconfigure(0, weight=1)
+        self.right_panel.rowconfigure(0, weight=1)
+
+        self.file_text['xscrollcommand'] = self.info_scrollbar_horizontal.set
+        self.file_text['yscrollcommand'] = self.info_scrollbar_vertical.set
+        self.info_scrollbar_vertical.config(command=self.file_text.yview)
+        self.info_scrollbar_horizontal.config(command=self.file_text.xview)
+
+        self.file_scrollbar_vertical = Scrollbar(self.right_panel, orient=VERTICAL)
+        self.file_listbox.config(yscrollcommand=self.file_scrollbar_vertical.set)
+        self.file_scrollbar_vertical.config(command=self.file_listbox.yview)
+       
+       # Layout
+       
+        self.left_panel.grid(column=0, row=0, rowspan=2, sticky=(N, E, S, W))
+        self.middle_panel.grid(column=1, row=0, sticky=(N, S))
+        self.right_panel.grid(column=2, row=0, sticky=(N, E, S, W))
+
+        self.torrent_directory_entry.grid(column=0, row=0)
+        self.file_directory_entry.grid(column=0, row=1)
+
+        self.torrent_listbox.grid(column=0, row=0, sticky=(N, E, S, W))
         self.file_listbox.grid(column=0, row=0, sticky=(N, E, S, W))
-
-        main_window.columnconfigure(0, weight=2)
-        main_window.columnconfigure(1, weight=1)
-        main_window.columnconfigure(2, weight=2)
-        main_window.rowconfigure(0, weight=1)
-
-        left_panel.columnconfigure(0, weight=1)
-        left_panel.rowconfigure(0, weight=1)
-        right_panel.columnconfigure(0, weight=1)
-        right_panel.rowconfigure(0, weight=1)
-
-        # file_text = Text(right_lower_panel)
-        self.file_text = Text(middle_panel, wrap="none")
-        # file_text.grid(column=0, row=0, sticky=(N, E, S, W))
-        info_scrollbar_vertical = Scrollbar(middle_panel, orient=VERTICAL)
-        info_scrollbar_horizontal = Scrollbar(middle_panel, orient=HORIZONTAL)
-        self.file_text['xscrollcommand'] = info_scrollbar_horizontal.set
-        self.file_text['yscrollcommand'] = info_scrollbar_vertical.set
-        info_scrollbar_vertical.config(command=self.file_text.yview)
-        info_scrollbar_horizontal.config(command=self.file_text.xview)
+        
         self.file_text.grid(column=0, row=2, sticky=(N, E))
-        info_scrollbar_vertical.grid(column=1, row=2, sticky=(N, S, W))
-        info_scrollbar_horizontal.grid(column=0, row=3, stick=(S, E, W))
-
-        file_scrollbar_vertical = Scrollbar(right_panel, orient=VERTICAL)
-        self.file_listbox.config(yscrollcommand=file_scrollbar_vertical.set)
-        file_scrollbar_vertical.config(command=self.file_listbox.yview)
-        file_scrollbar_vertical.grid(column=1, row=0, sticky=(N, S, W))
-
-        # self.file_text.insert('1.0', 'Lorem ipsum dolor sit amet')
-
-        self.correlate_files()
-
-        root.mainloop()
+        self.info_scrollbar_vertical.grid(column=1, row=2, sticky=(N, S, W))
+        self.info_scrollbar_horizontal.grid(column=0, row=3, stick=(S, E, W))
+        self.file_scrollbar_vertical.grid(column=1, row=0, sticky=(N, S, W))
 
     def torrent_listbox_changed(self, selection):
         self.torrent_listbox.configure(background="white")
@@ -166,6 +176,7 @@ class ApplicationWindow:
         self.droplet_list.clear()
         for torrent_file in self.torrent_files_concatenated:
             self.droplet_list.append(Droplet(torrent_file, bdecode(torrent_file)))
+        print(self.torrent_files_concatenated)
 
     def update_files(self):
         input_1, input_2 = search_directory(self.file_directory_name, maximum_files = MAXIMUM_FILES)
