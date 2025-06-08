@@ -12,8 +12,10 @@ MP4_EXTENSION = ".mp4"
 APPLICATION_NAME = "Deluvian"
 #TORRENT_DIRECTORY = "F:\\Videos\\Torrent"
 #FILE_DIRECTORY = "F:\\Videos\\Movies"
-TORRENT_DIRECTORY = "/media/accessory/Extreme SSD/Torrents"
-FILE_DIRECTORY = "/media/accessory/Extreme SSD/Videos"
+#TORRENT_DIRECTORY = "/media/accessory/Extreme SSD/Torrents"
+#FILE_DIRECTORY = "/media/accessory/Extreme SSD/Videos"
+TORRENT_DIRECTORY = "/media/stewart/Extreme SSD/Torrents"
+FILE_DIRECTORY = "/media/stewart/Extreme SSD/Videos"
 
 MAXIMUM_TORRENTS = 25
 MAXIMUM_FILES = 25
@@ -27,19 +29,20 @@ class ApplicationWindow:
         self.torrent_directory_name = TORRENT_DIRECTORY
         self.file_directory_name = FILE_DIRECTORY
 
+        self.root = Tk()
+        self.root.title(APPLICATION_NAME)
+
         self.droplet_list = []
         self.torrent_files = None
         self.torrent_files_concatenated = None
-        self.torrent_list = None
+        self.torrent_list = StringVar()
         self.file_list = None
-        self.filename_list = None
+        self.filename_list = StringVar()
         self.associated_files = {}
 
         self.highlighted_torrents = []
         self.highlighted_files = []
-
-        self.root = Tk()
-        self.root.title(APPLICATION_NAME)
+        
         self.layout_window()
 
         #self.torrent_directory = StringVar()
@@ -51,7 +54,7 @@ class ApplicationWindow:
         self.populate_torrents()
         self.update_files()
         self.correlate_files()
-
+        
         self.root.mainloop()
         
     def layout_window(self):
@@ -168,20 +171,19 @@ class ApplicationWindow:
 
     def update_torrent_list(self):
         self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = MAXIMUM_TORRENTS)
-        self.torrent_list = StringVar(value=self.torrent_files_concatenated)
+        self.torrent_list.set(self.torrent_files_concatenated)
 
     def populate_torrents(self):
         self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = MAXIMUM_TORRENTS)
-        self.torrent_list = StringVar(value=self.torrent_files_concatenated)
+        self.torrent_list.set(self.torrent_files_concatenated)
         self.droplet_list.clear()
         for torrent_file in self.torrent_files_concatenated:
             self.droplet_list.append(Droplet(torrent_file, bdecode(torrent_file)))
-        print(self.torrent_files_concatenated)
 
     def update_files(self):
         input_1, input_2 = search_directory(self.file_directory_name, maximum_files = MAXIMUM_FILES)
         self.file_list = input_1
-        self.filename_list = StringVar(value=input_2)
+        self.filename_list.set(input_2)
 
     def correlate_files(self):
         index = 0
