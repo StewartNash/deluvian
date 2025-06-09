@@ -9,28 +9,19 @@ import os
 
 TORRENT_EXTENSION = ".torrent"
 MP4_EXTENSION = ".mp4"
-APPLICATION_NAME = "Deluvian"
-#TORRENT_DIRECTORY = "F:\\Videos\\Torrent"
-#FILE_DIRECTORY = "F:\\Videos\\Movies"
-#TORRENT_DIRECTORY = "/media/accessory/Extreme SSD/Torrents"
-#FILE_DIRECTORY = "/media/accessory/Extreme SSD/Videos"
-TORRENT_DIRECTORY = "/media/stewart/Extreme SSD/Torrents"
-FILE_DIRECTORY = "/media/stewart/Extreme SSD/Videos"
-
-MAXIMUM_TORRENTS = 25
-MAXIMUM_FILES = 25
 
 class ApplicationWindow:
-    def __init__(self):
+    def __init__(self, root, parent, settings):
 
         # torrent_directory = StringVar(value=torrent_directory_name)
         # file_directory = StringVar(value=file_directory_name)
 
-        self.torrent_directory_name = TORRENT_DIRECTORY
-        self.file_directory_name = FILE_DIRECTORY
+        self.root = root
+        self.parent = parent
+        self.settings = settings
 
-        self.root = Tk()
-        self.root.title(APPLICATION_NAME)
+        self.torrent_directory_name = self.settings['torrent_directories'][0]
+        self.file_directory_name = self.settings['file_directories'][0]
 
         self.droplet_list = []
         self.torrent_files = None
@@ -55,8 +46,6 @@ class ApplicationWindow:
         self.update_files()
         self.correlate_files()
         
-        self.root.mainloop()
-        
     def layout_window(self):
         self.main_window = ttk.Frame(self.root, padding=(3, 3, 12, 12))
         self.main_window.grid(column=0, row=0, sticky=(N, E, S, W))
@@ -66,15 +55,28 @@ class ApplicationWindow:
 
         # Configure menu
         self.root.option_add('*tearOff', FALSE)
-        self.root_window = Toplevel(self.root)
-        self.menubar = Menu(self.root_window)
-        self.root_window['menu'] = self.menubar
+        #self.root_window = Toplevel(self.root)
+        #self.menubar = Menu(self.root_window)
+        #self.root_window['menu'] = self.menubar
+        self.menubar = Menu(self.main_window)
+        #self.main_window['menu'] = self.menubar
         self.menu_manage = Menu(self.menubar)
         self.menubar.add_cascade(menu=self.menu_manage, label='Manage')
         self.menu_manage.add_command(label='Load Association', command=self.load_association)
         self.menu_manage.add_command(label='Save Association', command=self.save_association)
         self.menu_manage.add_command(label='Load Torrents', command=self.load_torrents)
         self.menu_manage.add_command(label='Associate Torrents', command=self.associate_torrents)
+
+        self.menu_file = Menu(self.menubar)
+        self.menubar.add_cascade(menu=self.menu_file, label='File')
+        self.menu_file.add_command(label='Load Association', command=self.load_association)
+        self.menu_file.add_command(label='Save Association', command=self.save_association)
+        self.menu_file.add_command(label='Load Torrents', command=self.load_torrents)
+        self.menu_file.add_command(label='Associate Torrents', command=self.associate_torrents)
+        
+        self.menu_edit = Menu(self.menubar)
+        self.menubar.add_cascade(menu=self.menu_edit, label='Edit')
+        self.menu_edit.add_command(label='Settings', command=self.parent.open_settings_window)        
 
         self.left_panel = ttk.Frame(self.main_window)
         self.middle_panel = ttk.Frame(self.main_window)
@@ -142,7 +144,9 @@ class ApplicationWindow:
         self.info_scrollbar_vertical.grid(column=1, row=2, sticky=(N, S, W))
         self.info_scrollbar_horizontal.grid(column=0, row=3, stick=(S, E, W))
         self.file_scrollbar_vertical.grid(column=1, row=0, sticky=(N, S, W))
-
+        
+        self.root.config(menu=self.menubar)
+ 
     def torrent_listbox_changed(self, selection):
         self.torrent_listbox.configure(background="white")
         self.file_listbox.configure(background="white")
@@ -170,18 +174,18 @@ class ApplicationWindow:
         # self.file_text.insert(END, print_tuple_list())
 
     def update_torrent_list(self):
-        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = MAXIMUM_TORRENTS)
+        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = self.settings['maximum_torrents'])
         self.torrent_list.set(self.torrent_files_concatenated)
 
     def populate_torrents(self):
-        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = MAXIMUM_TORRENTS)
+        self.torrent_files, self.torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION, maximum_files = self.settings['maximum_files'])
         self.torrent_list.set(self.torrent_files_concatenated)
         self.droplet_list.clear()
         for torrent_file in self.torrent_files_concatenated:
             self.droplet_list.append(Droplet(torrent_file, bdecode(torrent_file)))
 
     def update_files(self):
-        input_1, input_2 = search_directory(self.file_directory_name, maximum_files = MAXIMUM_FILES)
+        input_1, input_2 = search_directory(self.file_directory_name, maximum_files = self.settings['maximum_files'])
         self.file_list = input_1
         self.filename_list.set(input_2)
 
@@ -240,19 +244,96 @@ class ApplicationWindow:
     def associate_torrents(self):
         None
 
+class SettingsWindow:
+    window_title = "Settings"
+    
+    def __init__(self, root, parent):
+        self.root = root
+        self.settings_window = Toplevel(self.root)
+        self.settings_window.title(SettingsWindow.window_title)
+        
+        self.layout_window()
+        
+    def layout_window(self):
+        self.top_frame = ttk.Frame(self.settings_window)
+        #self.middle_frame = ttk.Frame(self.settings_window)
+        self.bottom_frame = ttk.Frame(self.settings_window)
+        
+        self.tab_control = ttk.Notebook(self.top_frame)
+        self.location_tab = ttk.Frame(self.tab_control)
+        self.display_tab = ttk.Frame(self.tab_control)
+        
+        # Location tab
+        
+        self.file_directory_label = ttk.Label(self.location_tab, text="File Directory: ")
+        self.file_directory_entry = ttk.Entry(self.location_tab)
+        self.file_directory_button = ttk.Button(self.location_tab, text="Add", command = self.add_file_directory)
+        self.torrent_directory_label = ttk.Label(self.location_tab, text="Torrent Directory: ")
+        self.torrent_directory_entry = ttk.Entry(self.location_tab)
+        self.torrent_directory_button = ttk.Button(self.location_tab, text="Add", command = self.add_torrent_directory)
+        
+        # Display tab
+        
+        self.show_file_directory = IntVar()
+        self.show_torrent_directory = IntVar()
 
+        self.torrent_directory_checkbutton = ttk.Checkbutton(self.display_tab,
+            text="Show directories for torrents",
+            variable=self.show_torrent_directory,
+            onvalue=0,
+            offvalue=1)
+        self.file_directory_checkbutton = ttk.Checkbutton(self.display_tab,
+            text="Show directories for files",
+            variable=self.show_file_directory,
+            onvalue=0,
+            offvalue=1)
+        
+        self.okay_button = ttk.Button(self.bottom_frame, text="Okay", command=self.okay_button_click)
+        self.apply_button = ttk.Button(self.bottom_frame, text="Apply", command=self.apply_button_click)
+        self.cancel_button = ttk.Button(self.bottom_frame, text="Cancel", command=self.cancel_button_click)
+        
+        self.tab_control.add(self.location_tab, text='Location')
+        self.tab_control.add(self.display_tab, text='Display')
+        
+        self.top_frame.grid(column=0, row=0, sticky=(N, E, S, W))
+        self.bottom_frame.grid(column=0, row=1, sticky=(N, E, S, W))
+        
+        self.okay_button.grid(column=0, row=0)
+        self.apply_button.grid(column=1, row=0)
+        self.cancel_button.grid(column=2, row=0)
+        
+        self.torrent_directory_checkbutton.grid(column=0, row=0, sticky=(W))
+        self.file_directory_checkbutton.grid(column=0, row=1, sticky=(W))
+        
+        self.tab_control.pack(expand=1, fill="both")
 
-    # def torrent_files_concatenated(self):
-    #     torrent_files, torrent_files_concatenated = search_directory_extension(self.torrent_directory_name, TORRENT_EXTENSION)
-    #     return torrent_files_concatenated
+        self.file_directory_label.grid(column=0, row=0, sticky=(W))
+        self.file_directory_entry.grid(column=1, row=0)
+        self.file_directory_button.grid(column=3, row=0)
+        self.torrent_directory_label.grid(column=0, row=1, sticky=(W))
+        self.torrent_directory_entry.grid(column=1, row=1)
+        self.torrent_directory_button.grid(column=3, row=1)
 
-
+    def okay_button_click(self):
+        pass
+        
+    def apply_button_click(self):
+        pass
+    
+    def cancel_button_click(self):
+        pass
+        
+    def add_file_directory(self):
+        pass
+        
+    def add_torrent_directory(self):
+        pass
+        
 ROOT_INDEX = 0
 FILENAME_INDEX = 1
 
 FILEPATH_INDEX = 0
 LENGTH_INDEX = 1
-
 
 def add_similar_files(droplet, file_list):
     associated_file_indices = []
