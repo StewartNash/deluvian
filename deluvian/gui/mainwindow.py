@@ -252,6 +252,9 @@ class SettingsWindow:
         self.settings_window = Toplevel(self.root)
         self.settings_window.title(SettingsWindow.window_title)
         
+        self.file_directory_list = StringVar()
+        self.torrent_directory_list = StringVar()
+        
         self.layout_window()
         
     def layout_window(self):
@@ -266,11 +269,17 @@ class SettingsWindow:
         # Location tab
         
         self.file_directory_label = ttk.Label(self.location_tab, text="File Directory: ")
+        self.file_directory_list_label = ttk.Label(self.location_tab, text="File Directories")
         self.file_directory_entry = ttk.Entry(self.location_tab)
-        self.file_directory_button = ttk.Button(self.location_tab, text="Add", command = self.add_file_directory)
+        self.file_directory_add_button = ttk.Button(self.location_tab, text="Add", command = self.add_file_directory)
+        self.file_directory_browse_button = ttk.Button(self.location_tab, text="Browse", command = self.browse_file_directory)
+        self.file_directory_listbox = Listbox(self.location_tab, listvariable=self.file_directory_list)
         self.torrent_directory_label = ttk.Label(self.location_tab, text="Torrent Directory: ")
+        self.torrent_directory_list_label = ttk.Label(self.location_tab, text="Torrent Directories")
         self.torrent_directory_entry = ttk.Entry(self.location_tab)
-        self.torrent_directory_button = ttk.Button(self.location_tab, text="Add", command = self.add_torrent_directory)
+        self.torrent_directory_add_button = ttk.Button(self.location_tab, text="Add", command = self.add_torrent_directory)
+        self.torrent_directory_browse_button = ttk.Button(self.location_tab, text="Browse", command = self.browse_torrent_directory)
+        self.torrent_directory_listbox = Listbox(self.location_tab, listvariable=self.torrent_directory_list)
         
         # Display tab
         
@@ -309,11 +318,19 @@ class SettingsWindow:
 
         self.file_directory_label.grid(column=0, row=0, sticky=(W))
         self.file_directory_entry.grid(column=1, row=0)
-        self.file_directory_button.grid(column=3, row=0)
+        self.file_directory_add_button.grid(column=3, row=0)
+        self.file_directory_browse_button.grid(column=4, row=0)
+
         self.torrent_directory_label.grid(column=0, row=1, sticky=(W))
         self.torrent_directory_entry.grid(column=1, row=1)
-        self.torrent_directory_button.grid(column=3, row=1)
-
+        self.torrent_directory_add_button.grid(column=3, row=1)
+        self.torrent_directory_browse_button.grid(column=4, row=1)
+        
+        self.file_directory_list_label.grid(column=0, columnspan=4, row=2, sticky=(W))
+        self.file_directory_listbox.grid(column=0, columnspan=4, row=3, sticky=(W))
+        self.torrent_directory_list_label.grid(column=0, columnspan=4, row=4, sticky=(W))
+        self.torrent_directory_listbox.grid(column=0, columnspan=4, row=5, sticky=(W))
+        
     def okay_button_click(self):
         pass
         
@@ -327,6 +344,12 @@ class SettingsWindow:
         pass
         
     def add_torrent_directory(self):
+        pass
+
+    def browse_file_directory(self):
+        pass
+        
+    def browse_torrent_directory(self):
         pass
         
 ROOT_INDEX = 0
