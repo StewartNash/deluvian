@@ -8,10 +8,10 @@ DEBUG = True
 
 #TORRENT_DIRECTORY = "F:\\Videos\\Torrent"
 #FILE_DIRECTORY = "F:\\Videos\\Movies"
-#TORRENT_DIRECTORY = "/media/accessory/Extreme SSD/Torrents"
-#FILE_DIRECTORY = "/media/accessory/Extreme SSD/Videos"
-TORRENT_DIRECTORY = "/media/stewart/Extreme SSD/Torrents"
-FILE_DIRECTORY = "/media/stewart/Extreme SSD/Videos"
+TORRENT_DIRECTORY = "/media/accessory/Extreme SSD/Torrents"
+FILE_DIRECTORY = "/media/accessory/Extreme SSD/Videos"
+#TORRENT_DIRECTORY = "/media/stewart/Extreme SSD/Torrents"
+#FILE_DIRECTORY = "/media/stewart/Extreme SSD/Videos"
 
 class Application:
 	application_title = "Deluvian"
@@ -19,7 +19,7 @@ class Application:
 	def __init__(self):
 		self.root = Tk()
 		self.root.title(Application.application_title)
-				
+		
 		self.session = self.load_session()
 		self.window = ApplicationWindow(self.root, self, self.session)
 		self.settings_window = None		

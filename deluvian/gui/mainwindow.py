@@ -141,7 +141,9 @@ class ApplicationWindow:
         self.torrent_scrollbar_horizontal.config(command=self.torrent_listbox.xview)
 
         self.file_listbox.config(yscrollcommand=self.file_scrollbar_vertical.set)
+        self.file_listbox.config(xscrollcommand=self.file_scrollbar_horizontal.set)
         self.file_scrollbar_vertical.config(command=self.file_listbox.yview)
+        self.file_scrollbar_horizontal.config(command=self.file_listbox.xview)
        
         # Layout
 
@@ -149,6 +151,8 @@ class ApplicationWindow:
         self.left_panel.grid(column=0, row=1, sticky=(N, E, S, W))
         self.middle_panel.grid(column=1, row=1, sticky=(N, E, S, W))
         self.right_panel.grid(column=2, row=1, sticky=(N, S))        
+
+        self.search_button.grid(column=0, row=0, sticky=(W))
 
         #self.torrent_directory_entry.grid(column=0, row=0)
         #self.file_directory_entry.grid(column=0, row=1)
@@ -268,7 +272,11 @@ class ApplicationWindow:
         None
         
     def search_callback(self):
-        self.parent.do_search
+        self.torrent_files, self.torrent_files_concatenated = self.session.do_search()
+        self.torrent_list.set(self.torrent_files_concatenated)
+        self.droplet_list.clear()
+        for torrent_file in self.torrent_files_concatenated:
+            self.droplet_list.append(Droplet(torrent_file, bdecode(torrent_file)))
 
 class SettingsWindow:
     window_title = "Settings"
